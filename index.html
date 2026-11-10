@@ -119,6 +119,14 @@ textarea {
 }
 :focus-visible { outline: 3px solid var(--banana); outline-offset: 2px; }
 
+.squad { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: flex; border: 1px solid var(--crate-edge); border-radius: 4px; overflow: hidden; max-width: 100%; }
+.chip button { font: 500 0.9rem var(--font-body); background: var(--ink); color: var(--sand); border: 0; padding: 9px 10px; cursor: pointer; text-align: left; }
+.chip button.rm { border-left: 1px solid var(--crate-edge); color: var(--sand-dim); padding: 9px 11px; }
+.chip.on { border-color: var(--banana); }
+.chip.on button.pick { background: var(--banana); color: var(--ink); font-weight: 600; }
+.add { font: 600 0.9rem var(--font-body); background: transparent; color: var(--banana); border: 1px dashed var(--banana); border-radius: 4px; padding: 9px 12px; cursor: pointer; }
+.add:disabled { opacity: 0.4; cursor: not-allowed; }
 .seg { display: flex; border: 1px solid var(--crate-edge); border-radius: 4px; overflow: hidden; }
 .seg button {
   flex: 1; font: 600 0.95rem var(--font-body);
@@ -139,9 +147,10 @@ textarea {
 }
 .btn.ghost { background: transparent; color: var(--banana); }
 a.btn { text-decoration: none; display: inline-block; }
-.send { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.send { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+[hidden] { display: none !important; }
 .send .btn { padding: 12px 6px; font-size: 0.92rem; }
-@media (max-width: 440px) { .send { grid-template-columns: 1fr; } }
+
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 @media (prefers-reduced-motion: reduce) { .btn:active:not(:disabled) { transform: none; } }
@@ -177,6 +186,11 @@ footer p { margin: 0; }
 
   <section aria-labelledby="h-brief">
     <h2 id="h-brief"><span class="num">01</span><span data-i18n="s1"></span></h2>
+    <div class="field">
+      <span class="label" id="squadLabel" data-i18n="squad"></span>
+      <div class="squad" id="squad" role="group" aria-labelledby="squadLabel"></div>
+      <p class="help" data-i18n="squadHelp"></p>
+    </div>
     <div class="grid">
       <div class="field full">
         <label for="species" data-i18n="species"></label>
@@ -200,6 +214,17 @@ footer p { margin: 0; }
       <div class="field full">
         <label for="faction" data-i18n="faction"></label>
         <select id="faction"></select>
+      </div>
+      <div class="field full">
+        <span class="label" id="outLabel" data-i18n="output"></span>
+        <div class="seg" role="group" aria-labelledby="outLabel">
+          <button type="button" id="outImage" aria-pressed="true" data-i18n="outImage"></button>
+          <button type="button" id="outVideo" aria-pressed="false" data-i18n="outVideo"></button>
+        </div>
+      </div>
+      <div class="field full" id="emoteField" hidden>
+        <label for="emote" data-i18n="emote"></label>
+        <select id="emote"></select>
       </div>
       <div class="field">
         <label for="style" data-i18n="style"></label>
@@ -231,6 +256,7 @@ footer p { margin: 0; }
       <a class="btn ghost" id="toGpt" target="_blank" rel="noopener" href="https://chatgpt.com/">ChatGPT</a>
       <a class="btn ghost" id="toGrok" target="_blank" rel="noopener" href="https://grok.com/">Grok</a>
       <a class="btn ghost" id="toGemini" target="_blank" rel="noopener" href="https://gemini.google.com/app">Gemini</a>
+      <a class="btn ghost" id="toHiggs" target="_blank" rel="noopener" href="https://higgsfield.ai/">Higgsfield</a>
     </div>
     <p class="help" data-i18n="sendHelp"></p>
   </section>
@@ -287,7 +313,25 @@ footer p { margin: 0; }
     ["marmoset", "Ouistiti", "Marmoset", "a tiny common marmoset with white ear tufts"],
     ["gibbon", "Gibbon", "Gibbon", "a white-handed gibbon with very long arms"],
     ["howler", "Singe hurleur", "Howler monkey", "a howler monkey, mouth open mid-roar"],
-    ["tamarin", "Tamarin empereur", "Emperor tamarin", "an emperor tamarin with a long white moustache"]
+    ["tamarin", "Tamarin empereur", "Emperor tamarin", "an emperor tamarin with a long white moustache"],
+    ["babygorilla", "Bébé gorille", "Baby gorilla", "a fluffy baby gorilla"],
+    ["babyorang", "Bébé orang-outan", "Baby orangutan", "a baby orangutan with wild spiky orange hair"],
+    ["gelada", "Gélada", "Gelada", "a gelada with a golden mane and a red chest patch, baring its teeth"],
+    ["drill", "Drill", "Drill", "a drill monkey with a jet-black face"],
+    ["rhesus", "Macaque rhésus", "Rhesus macaque", "a rhesus macaque"],
+    ["barbary", "Magot (macaque de Barbarie)", "Barbary macaque", "a tailless Barbary macaque"],
+    ["vervet", "Vervet", "Vervet monkey", "a vervet monkey with a black face framed by white fur"],
+    ["patas", "Patas", "Patas monkey", "a long-legged patas monkey with a white moustache"],
+    ["colobus", "Colobe guéréza", "Black-and-white colobus", "a black-and-white colobus monkey with a long white mantle"],
+    ["douc", "Douc à pattes rouges", "Red-shanked douc", "a red-shanked douc langur with a colourful face"],
+    ["langur", "Langur gris", "Grey langur", "a grey langur with a black face"],
+    ["uakari", "Ouakari chauve", "Bald uakari", "a bald uakari with a bright crimson bald head"],
+    ["saki", "Saki à face blanche", "White-faced saki", "a white-faced saki with shaggy black fur"],
+    ["spider", "Singe-araignée", "Spider monkey", "a lanky spider monkey with very long limbs"],
+    ["liontamarin", "Tamarin-lion doré", "Golden lion tamarin", "a golden lion tamarin with a bright orange mane"],
+    ["siamang", "Siamang", "Siamang", "a black siamang with an inflated throat sac"],
+    ["lemur", "Lémur catta", "Ring-tailed lemur", "a ring-tailed lemur with wide orange eyes"],
+    ["ayeaye", "Aye-aye", "Aye-aye", "an aye-aye with huge ears and bulging eyes"]
   ];
 
   var NATIONS = [
@@ -303,41 +347,105 @@ footer p { margin: 0; }
     ["cn", "Chine", "China"],
     ["ch", "Suisse", "Switzerland"],
     ["cz", "Tchéquie", "Czechia"],
-    ["se", "Suède", "Sweden"]
+    ["se", "Suède", "Sweden"],
+    ["jp", "Japon", "Japan"],
+    ["kr", "Corée du Sud", "South Korea"],
+    ["za", "Afrique du Sud", "South Africa"],
+    ["fi", "Finlande", "Finland"],
+    ["pl", "Pologne", "Poland"],
+    ["rs", "Serbie / Yougoslavie", "Serbia / Yugoslavia"],
+    ["hr", "Croatie", "Croatia"],
+    ["es", "Espagne", "Spain"],
+    ["br", "Brésil", "Brazil"],
+    ["in", "Inde", "India"],
+    ["sg", "Singapour", "Singapore"],
+    ["au", "Australie", "Australia"],
+    ["ca", "Canada", "Canada"],
+    ["tr", "Turquie", "Turkey"],
+    ["np", "Népal", "Nepal"],
+    ["xx", "Improvisé / sans nation", "Improvised / no nation"]
   ];
 
   var TYPES = [
     ["ar", "Fusil d'assaut", "Assault rifle", "assault rifle"],
-    ["mg", "Mitrailleuse", "Machine gun", "belt-fed machine gun"],
+    ["mg", "Mitrailleuse", "Machine gun", "machine gun"],
     ["sn", "Fusil de précision", "Sniper rifle", "sniper rifle"],
     ["smg", "Pistolet-mitrailleur", "Submachine gun", "submachine gun"],
-    ["pi", "Pistolet", "Pistol", "pistol"],
+    ["pi", "Pistolet / revolver", "Pistol / revolver", "pistol"],
     ["sg", "Fusil à pompe", "Shotgun", "shotgun"],
-    ["rl", "Lance-roquettes", "Rocket launcher", "shoulder-fired launcher"]
+    ["rl", "Lance-roquettes", "Rocket launcher", "shoulder-fired launcher"],
+    ["gl", "Lance-grenades", "Grenade launcher", "grenade launcher"],
+    ["ml", "Arme blanche", "Melee weapon", ""],
+    ["im", "Improvisé", "Improvised", ""]
   ];
 
   /* [name, nation, type] */
   var WEAPONS = [
-    ["AK-47", "ru", "ar"], ["AK-74M", "ru", "ar"], ["PKM", "ru", "mg"], ["SVD Dragunov", "ru", "sn"],
-    ["PP-19 Bizon", "ru", "smg"], ["Makarov PM", "ru", "pi"], ["Saiga-12", "ru", "sg"], ["RPG-7", "ru", "rl"],
-    ["M4A1", "us", "ar"], ["M16A4", "us", "ar"], ["M249 SAW", "us", "mg"], ["M60", "us", "mg"],
-    ["Barrett M82", "us", "sn"], ["Thompson M1928", "us", "smg"], ["Colt M1911", "us", "pi"],
-    ["Mossberg 590", "us", "sg"], ["FGM-148 Javelin", "us", "rl"],
-    ["FAMAS", "fr", "ar"], ["AA-52", "fr", "mg"], ["FR-F2", "fr", "sn"], ["MAT-49", "fr", "smg"],
-    ["PAMAS G1", "fr", "pi"], ["LRAC F1", "fr", "rl"],
-    ["HK G36", "de", "ar"], ["HK416", "de", "ar"], ["MG3", "de", "mg"], ["HK MP5", "de", "smg"],
-    ["HK USP", "de", "pi"], ["Panzerfaust 3", "de", "rl"],
-    ["FN FAL", "be", "ar"], ["FN SCAR-L", "be", "ar"], ["FN MAG", "be", "mg"], ["FN Minimi", "be", "mg"],
-    ["FN P90", "be", "smg"], ["Browning Hi-Power", "be", "pi"],
+    ["AK-47", "ru", "ar"], ["AK-74M", "ru", "ar"], ["AKS-74U", "ru", "ar"], ["AN-94", "ru", "ar"],
+    ["PKM", "ru", "mg"], ["RPK", "ru", "mg"], ["SVD Dragunov", "ru", "sn"], ["VSS Vintorez", "ru", "sn"],
+    ["Mosin-Nagant", "ru", "sn", "shouldering a Mosin-Nagant bolt-action rifle"],
+    ["PP-19 Bizon", "ru", "smg"], ["PPSh-41", "ru", "smg"], ["Makarov PM", "ru", "pi"], ["Tokarev TT-33", "ru", "pi"],
+    ["Saiga-12", "ru", "sg"], ["RPG-7", "ru", "rl"],
+    ["M4A1", "us", "ar"], ["M16A4", "us", "ar"], ["AR-15", "us", "ar"], ["M14", "us", "ar", "gripping an M14 battle rifle with both hands"],
+    ["M249 SAW", "us", "mg"], ["M60", "us", "mg"],
+    ["M134 Minigun", "us", "mg", "hauling an M134 Minigun, an ammunition belt draped over its shoulder"],
+    ["Barrett M82", "us", "sn"], ["M24", "us", "sn"], ["Thompson M1928", "us", "smg"], ["MAC-10", "us", "smg"],
+    ["Colt M1911", "us", "pi"], ["S&W Model 29", "us", "pi", "holding a huge S&W Model 29 revolver in one hand"],
+    ["Colt Single Action Army", "us", "pi", "twirling a Colt Single Action Army revolver"],
+    ["Mossberg 590", "us", "sg"], ["Remington 870", "us", "sg"],
+    ["FGM-148 Javelin", "us", "rl"], ["M72 LAW", "us", "rl"], ["M79", "us", "gl"],
+    ["Ka-Bar", "us", "ml", "brandishing a Ka-Bar combat knife"],
+    ["FAMAS", "fr", "ar"], ["AA-52", "fr", "mg"], ["FR-F2", "fr", "sn"], ["PGM Hécate II", "fr", "sn"],
+    ["MAT-49", "fr", "smg"], ["PAMAS G1", "fr", "pi"],
+    ["Manurhin MR 73", "fr", "pi", "holding a Manurhin MR 73 revolver in one hand"], ["LRAC F1", "fr", "rl"],
+    ["HK G36", "de", "ar"], ["HK416", "de", "ar"], ["HK G3", "de", "ar", "gripping an HK G3 battle rifle with both hands"],
+    ["StG 44", "de", "ar"], ["MG3", "de", "mg"], ["MG42", "de", "mg"], ["HK PSG1", "de", "sn"],
+    ["HK MP5", "de", "smg"], ["HK MP7", "de", "smg"], ["MP40", "de", "smg"],
+    ["HK USP", "de", "pi"], ["Luger P08", "de", "pi"], ["Walther PPK", "de", "pi"],
+    ["Panzerfaust 3", "de", "rl"], ["HK69A1", "de", "gl"],
+    ["FN FAL", "be", "ar"], ["FN SCAR-L", "be", "ar"], ["FN F2000", "be", "ar"], ["FN MAG", "be", "mg"], ["FN Minimi", "be", "mg"],
+    ["FN P90", "be", "smg"], ["Browning Hi-Power", "be", "pi"], ["FN Five-seveN", "be", "pi"],
     ["IMI Galil", "il", "ar"], ["Tavor TAR-21", "il", "ar"], ["IWI Negev", "il", "mg"], ["Uzi", "il", "smg"],
-    ["Desert Eagle", "il", "pi"],
-    ["L85A2", "uk", "ar"], ["Bren", "uk", "mg"], ["L96A1", "uk", "sn"], ["Sten", "uk", "smg"],
-    ["Steyr AUG", "at", "ar"], ["Steyr SSG 69", "at", "sn"], ["Glock 17", "at", "pi"],
-    ["Beretta ARX160", "it", "ar"], ["Beretta 92", "it", "pi"], ["Benelli M4", "it", "sg"], ["Franchi SPAS-12", "it", "sg"],
-    ["QBZ-95", "cn", "ar"], ["Type 56", "cn", "ar"],
-    ["SIG SG 550", "ch", "ar"], ["SIG P226", "ch", "pi"],
-    ["Vz. 58", "cz", "ar"], ["Škorpion vz. 61", "cz", "smg"], ["CZ 75", "cz", "pi"],
-    ["Carl Gustaf M4", "se", "rl"], ["AT4", "se", "rl"]
+    ["Desert Eagle", "il", "pi"], ["Jericho 941", "il", "pi"],
+    ["L85A2", "uk", "ar"], ["Bren", "uk", "mg"], ["L96A1", "uk", "sn"],
+    ["Lee-Enfield", "uk", "sn", "shouldering a Lee-Enfield bolt-action rifle"],
+    ["Sten", "uk", "smg"], ["Sterling", "uk", "smg"],
+    ["Webley Mk VI", "uk", "pi", "holding a Webley Mk VI revolver in one hand"],
+    ["Steyr AUG", "at", "ar"], ["Steyr SSG 69", "at", "sn"], ["Steyr TMP", "at", "smg"], ["Glock 17", "at", "pi"],
+    ["Beretta ARX160", "it", "ar"], ["Beretta M12", "it", "smg"], ["Beretta 92", "it", "pi"],
+    ["Benelli M4", "it", "sg"], ["Franchi SPAS-12", "it", "sg"],
+    ["QBZ-95", "cn", "ar"], ["Type 56", "cn", "ar"], ["QBU-88", "cn", "sn"], ["QCW-05", "cn", "smg"],
+    ["QSZ-92", "cn", "pi"], ["Type 69 RPG", "cn", "rl"],
+    ["SIG SG 550", "ch", "ar"], ["SIG SG 552", "ch", "ar"], ["B&T APC9", "ch", "smg"], ["SIG P226", "ch", "pi"],
+    ["Vz. 58", "cz", "ar"], ["CZ 805 BREN", "cz", "ar"], ["UK vz. 59", "cz", "mg"],
+    ["Škorpion vz. 61", "cz", "smg"], ["CZ Scorpion Evo 3", "cz", "smg"], ["CZ 75", "cz", "pi"],
+    ["Ak 5", "se", "ar"], ["Carl Gustaf m/45", "se", "smg"], ["Carl Gustaf M4", "se", "rl"], ["AT4", "se", "rl"],
+    ["Howa Type 89", "jp", "ar"], ["Type 100", "jp", "smg"], ["Nambu Type 14", "jp", "pi"],
+    ["Katana", "jp", "ml", "brandishing a katana with both hands"],
+    ["Daewoo K2", "kr", "ar"], ["Daewoo K3", "kr", "mg"], ["Daewoo K7", "kr", "smg"], ["Daewoo K5", "kr", "pi"],
+    ["USAS-12", "kr", "sg"],
+    ["Vektor R4", "za", "ar"], ["Vektor SS-77", "za", "mg"], ["Denel NTW-20", "za", "sn"],
+    ["Armsel Striker", "za", "sg"], ["Milkor MGL", "za", "gl"],
+    ["Rk 62", "fi", "ar"], ["Sako TRG-42", "fi", "sn"], ["Suomi KP/-31", "fi", "smg"], ["Lahti L-35", "fi", "pi"],
+    ["Puukko", "fi", "ml", "brandishing a puukko knife"],
+    ["FB Beryl", "pl", "ar"], ["UKM-2000", "pl", "mg"], ["PM-63 RAK", "pl", "smg"], ["WIST-94", "pl", "pi"],
+    ["Zastava M70", "rs", "ar"], ["Zastava M84", "rs", "mg"], ["Zastava M76", "rs", "sn"],
+    ["Zastava CZ 99", "rs", "pi"], ["M80 Zolja", "rs", "rl"],
+    ["VHS-2", "hr", "ar"], ["RT-20", "hr", "sn"], ["HS2000", "hr", "pi"],
+    ["CETME Model L", "es", "ar"], ["Star Z-84", "es", "smg"], ["Astra 400", "es", "pi"],
+    ["IMBEL IA2", "br", "ar"], ["Taurus PT92", "br", "pi"],
+    ["INSAS", "in", "ar"],
+    ["SAR 21", "sg", "ar"], ["Ultimax 100", "sg", "mg"],
+    ["F88 Austeyr", "au", "ar"], ["Owen gun", "au", "smg"],
+    ["Colt Canada C7", "ca", "ar"],
+    ["MPT-76", "tr", "ar"],
+    ["Kukri", "np", "ml", "brandishing a curved kukri knife"],
+    ["Machete", "xx", "ml", "brandishing a rusty machete", "Machette"],
+    ["Baseball bat", "xx", "ml", "swinging a baseball bat wrapped in barbed wire", "Batte de baseball"],
+    ["Banana", "xx", "im", "pointing a banana at the camera like a pistol", "Banane (tenue comme un pistolet)"],
+    ["Water pistol", "xx", "im", "aiming a neon plastic water pistol with total seriousness", "Pistolet à eau"],
+    ["Slingshot", "xx", "im", "drawing back a wooden slingshot", "Lance-pierre"],
+    ["Coconut", "xx", "im", "about to throw a coconut like a grenade", "Noix de coco (façon grenade)"]
   ];
 
   /* [id, fr, en, outfit, setting] */
@@ -365,7 +473,25 @@ footer p { margin: 0; }
       "standing on a small wooden skiff on open sea, a cargo ship on the horizon"],
     ["mafia", "Mafia années 30", "1930s mafia",
       "dressed as a 1930s gangster: pinstripe suit, fedora, cigar",
-      "a rainy city alley at night beside a vintage black sedan, neon reflections on wet pavement"]
+      "a rainy city alley at night beside a vintage black sedan, neon reflections on wet pavement"],
+    ["army", "Armée régulière", "Regular army",
+      "wearing a standard infantry combat uniform, helmet with a camouflage cover, heavy rucksack",
+      "a muddy trench line under a grey sky, sandbags and barbed wire"],
+    ["yakuza", "Yakuzas", "Yakuza",
+      "dressed as a yakuza: open black suit jacket over a bare chest covered in irezumi-style tattoos, dark sunglasses",
+      "a neon-lit Tokyo back alley at night, paper lanterns and vending machines"],
+    ["raider", "Pillards post-apocalyptiques", "Wasteland raiders",
+      "dressed as a post-apocalyptic raider: armour made of tyres and scrap metal, welding goggles, spiked shoulder pads",
+      "a scorched desert highway with rusted car wrecks and a dust storm on the horizon"],
+    ["bodyguard", "Gardes du corps", "Bodyguards",
+      "dressed as a close-protection agent: black suit, white shirt, dark sunglasses, coiled earpiece",
+      "beside an armoured black limousine on an airport tarmac"],
+    ["resistance", "Résistance 1944", "1944 resistance",
+      "dressed as a 1944 resistance fighter: beret, worn leather jacket, plain armband, cigarette",
+      "a foggy forest clearing at dawn beside an old bicycle and a parachuted supply crate"],
+    ["heist", "Braqueurs de banque", "Bank robbers",
+      "dressed as a bank robber: dark boiler suit, latex gloves, a plastic novelty mask pushed up on the forehead",
+      "inside a bank vault, duffel bags overflowing with banknotes, alarm lights flashing red"]
   ];
 
   /* [id, fr, en, prompt lead] */
@@ -382,6 +508,30 @@ footer p { margin: 0; }
       "Bold comic book illustration, thick ink outlines, halftone shading, saturated flat colours"]
   ];
 
+  /* [id, fr, en, movement described for a video model] */
+  var EMOTES = [
+    ["floss", "Floss", "Floss", "the Floss dance: stiff arms swinging fast from side to side past the hips while the hips swing the opposite way"],
+    ["orange", "Orange Justice", "Orange Justice", "the Orange Justice dance: knees wobbling in and out, arms flailing loosely, then a big clap above the head"],
+    ["takel", "Take the L", "Take the L", "the Take the L dance: one hand held in an L shape on the forehead while the legs kick out left and right in a bouncy hop"],
+    ["default", "Danse par défaut", "Default dance", "the classic Fortnite default dance: quick arm crosses, air punches and a swaying hip shuffle"],
+    ["griddy", "Griddy", "Griddy", "the Griddy: skipping forward on the heels with swinging arms, then holding both hands up to the eyes like goggles"],
+    ["electro", "Electro Shuffle", "Electro Shuffle", "the Electro Shuffle: very fast shuffling footwork with both arms pumping in rhythm"],
+    ["fresh", "Fresh", "Fresh", "the Fresh dance: arms swinging side to side with finger snaps and loose swaying hips"],
+    ["bestmates", "Best Mates", "Best Mates", "the Best Mates dance: goofy bouncy sideways hops with arms swinging loosely"],
+    ["renegade", "Renegade", "Renegade", "the Renegade dance: fast arm waves, claps and a body roll"],
+    ["laugh", "Laugh It Up", "Laugh It Up", "the Laugh It Up emote: leaning back and mock-laughing while slapping a knee"],
+    ["dab", "Dab", "Dab", "a dab: dropping the head into a bent elbow while the other arm shoots out straight"],
+    ["tpose", "T-Pose", "T-Pose", "a rigid T-pose: arms straight out to the sides, perfectly still, staring ahead"],
+    ["jubilation", "Jubilation", "Jubilation", "the Jubilation emote: jumping up and down cheering with both arms raised"]
+  ];
+  var VIDEO_LEADS = {
+    phone: "Shaky handheld vertical smartphone video, amateur footage, harsh natural light",
+    press: "Documentary war-reporter footage, handheld camera, natural light",
+    movie: "Cinematic action movie shot, dramatic rim lighting, slow dolly-in, anamorphic look",
+    bodycam: "Grainy 1990s VHS bodycam footage, fisheye distortion, washed-out colours",
+    cartoon: "Bold 2D comic-style animation, thick ink outlines, saturated flat colours"
+  };
+
   var RATIOS = [
     ["4:5", "Portrait 4:5", "Portrait 4:5"],
     ["1:1", "Carré 1:1", "Square 1:1"],
@@ -392,13 +542,16 @@ footer p { margin: 0; }
   var T = {
     fr: {
       tagline: "Choisis ton singe, son arme et son camp. Le site écrit le prompt, ton IA d'image fait la photo, tu ajoutes la légende.",
-      s1: "Brief de mission", species: "Espèce de singe", weaponBy: "Choisir l'arme", byNation: "Par nation", byType: "Par type",
-      nation: "Nation", type: "Type d'arme", weapon: "Arme", faction: "Camp des combattants", style: "Style d'image", ratio: "Format",
+      squad: "Escouade", squadHelp: "Touche un singe pour le modifier avec les menus ci-dessous. Jusqu'à 5 singes.",
+      addMonkey: "+ Ajouter un singe", remove: "Retirer",
+      s1: "Brief de mission", species: "Espèce du singe sélectionné", weaponBy: "Choisir l'arme", byNation: "Par nation", byType: "Par type",
+      nation: "Nation", type: "Type d'arme", weapon: "Arme du singe sélectionné", faction: "Camp des combattants", style: "Style d'image", ratio: "Format",
       random: "Tirage au hasard",
       s2: "Prompt généré",
       promptHelp: "Envoie ce prompt à ton IA d'image, ou copie-le pour un autre outil (Midjourney…). Il est en anglais, la langue que ces outils comprennent le mieux.",
       sendTo: "Envoyer directement à",
-      sendHelp: "ChatGPT et Grok s'ouvrent avec le prompt déjà rempli. Pour Gemini, le prompt est copié : colle-le à l'arrivée.",
+      sendHelp: "ChatGPT et Grok s'ouvrent avec le prompt déjà rempli. Pour Gemini et Higgsfield, le prompt est copié : colle-le à l'arrivée.",
+      output: "Rendu", outImage: "Image", outVideo: "Vidéo", emote: "Emote / danse (vidéo)",
       copy: "Copier le prompt", copied: "Prompt copié.", copyFail: "Copie bloquée. Le texte est sélectionné : copie-le à la main.",
       s3: "Atelier meme",
       memeHelp: "Importe l'image obtenue, écris tes légendes, enregistre le PNG.",
@@ -413,13 +566,16 @@ footer p { margin: 0; }
     },
     en: {
       tagline: "Pick your monkey, its weapon and its side. The site writes the prompt, your image AI takes the picture, you add the caption.",
-      s1: "Mission brief", species: "Monkey species", weaponBy: "Pick the weapon", byNation: "By nation", byType: "By type",
-      nation: "Nation", type: "Weapon type", weapon: "Weapon", faction: "Fighter faction", style: "Image style", ratio: "Format",
+      squad: "Squad", squadHelp: "Tap a monkey to edit it with the menus below. Up to 5 monkeys.",
+      addMonkey: "+ Add a monkey", remove: "Remove",
+      s1: "Mission brief", species: "Selected monkey's species", weaponBy: "Pick the weapon", byNation: "By nation", byType: "By type",
+      nation: "Nation", type: "Weapon type", weapon: "Selected monkey's weapon", faction: "Fighter faction", style: "Image style", ratio: "Format",
       random: "Randomise",
       s2: "Generated prompt",
       promptHelp: "Send this prompt to your image AI, or copy it for another tool (Midjourney…).",
       sendTo: "Send straight to",
-      sendHelp: "ChatGPT and Grok open with the prompt already filled in. For Gemini the prompt is copied: paste it when you get there.",
+      sendHelp: "ChatGPT and Grok open with the prompt already filled in. For Gemini and Higgsfield the prompt is copied: paste it when you get there.",
+      output: "Output", outImage: "Image", outVideo: "Video", emote: "Emote / dance (video)",
       copy: "Copy prompt", copied: "Prompt copied.", copyFail: "Copy was blocked. The text is selected: copy it by hand.",
       s3: "Meme workshop",
       memeHelp: "Import the image you got, write your captions, save the PNG.",
@@ -438,11 +594,13 @@ footer p { margin: 0; }
   var lang = "fr";
   try { var saved = localStorage.getItem("wm-lang"); if (saved === "en" || saved === "fr") lang = saved; } catch (e) {}
   var mode = "nation";
+  var out = "image";
+  var MAX = 5, squad = [{ s: "babychimp", w: "PKM" }], active = 0, ready = false;
   var li = function () { return lang === "fr" ? 1 : 2; };
   var $ = function (id) { return document.getElementById(id); };
   var el = {
     species: $("species"), group: $("group"), weapon: $("weapon"), faction: $("faction"),
-    style: $("style"), ratio: $("ratio"), prompt: $("prompt"), canvas: $("canvas"),
+    style: $("style"), ratio: $("ratio"), emote: $("emote"), prompt: $("prompt"), canvas: $("canvas"),
     topText: $("topText"), bottomText: $("bottomText"), save: $("save")
   };
   var ctx = el.canvas.getContext("2d");
@@ -471,30 +629,102 @@ footer p { margin: 0; }
     var g = el.group.value;
     var items = WEAPONS.filter(function (w) { return (mode === "nation" ? w[1] : w[2]) === g; }).map(function (w) {
       var extra = mode === "nation" ? find(TYPES, w[2])[li()] : find(NATIONS, w[1])[li()];
-      return { value: w[0], label: w[0] + " · " + extra };
+      return { value: w[0], label: wname(w) + " · " + extra };
     });
     fill(el.weapon, items, keep);
   }
 
-  function buildPrompt() {
-    var sp = find(SPECIES, el.species.value);
-    var w = find(WEAPONS, el.weapon.value);
+  function wname(w) { return lang === "fr" && w[4] ? w[4] : w[0]; }
+  function hold(w) {
+    if (w[3]) return w[3];
     var ty = find(TYPES, w[2]);
-    var f = find(FACTIONS, el.faction.value);
-    var st = find(STYLES, el.style.value);
-    var hold = w[2] === "pi" ? "holding a " + w[0] + " pistol in one hand"
+    return w[2] === "pi" ? "holding a " + w[0] + " pistol in one hand"
       : w[2] === "rl" ? "resting a " + w[0] + " " + ty[3] + " on its shoulder"
       : "gripping a " + w[0] + " " + ty[3] + " with both hands";
-    el.prompt.value =
-      st[3] + ". " +
-      "The subject is " + sp[3] + ", " + f[3] + ", " + hold + ". " +
-      "The animal stares straight at the camera with a dead-serious, unimpressed expression. " +
-      "Setting: " + f[4] + ". " +
-      "Accurate animal anatomy and fur, the weapon is correctly proportioned and recognisable, absurd deadpan humour. " +
-      "No humans in focus, no text, no captions, no watermark, no logos. " +
-      "Leave clear space at the top and bottom of the frame for meme captions. " +
-      "Aspect ratio " + el.ratio.value + ".";
-    var q = encodeURIComponent("Generate an image: " + el.prompt.value);
+  }
+  function renderSquad() {
+    var box = $("squad"); box.textContent = "";
+    squad.forEach(function (m, i) {
+      var chip = document.createElement("div"); chip.className = "chip" + (i === active ? " on" : "");
+      var b = document.createElement("button"); b.type = "button"; b.className = "pick";
+      b.setAttribute("aria-pressed", String(i === active));
+      b.textContent = (i + 1) + " · " + find(SPECIES, m.s)[li()] + " · " + wname(find(WEAPONS, m.w));
+      b.addEventListener("click", function () { selectMember(i); });
+      chip.appendChild(b);
+      if (squad.length > 1) {
+        var r = document.createElement("button"); r.type = "button"; r.className = "rm"; r.textContent = "×";
+        r.setAttribute("aria-label", T[lang].remove + " " + (i + 1));
+        r.addEventListener("click", function () {
+          squad.splice(i, 1);
+          if (active >= squad.length) active = squad.length - 1; else if (i < active) active--;
+          selectMember(active);
+        });
+        chip.appendChild(r);
+      }
+      box.appendChild(chip);
+    });
+    var add = document.createElement("button"); add.type = "button"; add.className = "add";
+    add.textContent = T[lang].addMonkey; add.disabled = squad.length >= MAX;
+    add.addEventListener("click", function () {
+      if (squad.length >= MAX) return;
+      squad.push({ s: pick(SPECIES)[0], w: pick(WEAPONS)[0] });
+      selectMember(squad.length - 1);
+    });
+    box.appendChild(add);
+  }
+  function selectMember(i) {
+    active = i; ready = false;
+    var w = find(WEAPONS, squad[i].w);
+    el.species.value = squad[i].s;
+    ready = true;
+    setMode(mode, mode === "nation" ? w[1] : w[2], w[0]);
+    status("copyStatus", "");
+  }
+  function lead() { return out === "video" ? "Generate a video: " : "Generate an image: "; }
+  function setOut(o) {
+    out = o;
+    $("outImage").setAttribute("aria-pressed", String(o === "image"));
+    $("outVideo").setAttribute("aria-pressed", String(o === "video"));
+    $("emoteField").hidden = o !== "video";
+    status("copyStatus", ""); buildPrompt();
+  }
+  function buildPrompt() {
+    if (!ready) return;
+    squad[active] = { s: el.species.value, w: el.weapon.value };
+    renderSquad();
+    var f = find(FACTIONS, el.faction.value);
+    var st = find(STYLES, el.style.value);
+    var who;
+    if (squad.length === 1) {
+      who = "The subject is " + find(SPECIES, squad[0].s)[3] + ", " + f[3] + ", " + hold(find(WEAPONS, squad[0].w)) + ". ";
+    } else {
+      who = "The subjects are " + squad.length + " primates posing shoulder to shoulder like a squad photo: " +
+        squad.map(function (m, i) { return "(" + (i + 1) + ") " + find(SPECIES, m.s)[3] + " " + hold(find(WEAPONS, m.w)); }).join("; ") + ". " +
+        "Each one is " + f[3] + ". Every animal and every weapon is clearly distinct and fully visible. ";
+    }
+    var many = squad.length > 1;
+    if (out === "video") {
+      el.prompt.value =
+        VIDEO_LEADS[st[0]] + ". " + who +
+        "Action: " + (many ? "they all perform " : "the animal performs ") + find(EMOTES, el.emote.value)[3] +
+        (many ? ", perfectly in sync, weapons still in hand, with dead-serious faces, then they freeze and stare at the camera. "
+              : ", weapon still in hand, with a dead-serious face, then freezes and stares at the camera. ") +
+        "Setting: " + f[4] + ". " +
+        "Smooth natural motion, stable anatomy and fur, weapons stay correctly proportioned, absurd deadpan humour. " +
+        "No humans in focus, no text, no captions, no watermark, no logos. " +
+        "Duration about 5 seconds. Aspect ratio " + el.ratio.value + ".";
+    } else {
+      el.prompt.value =
+        st[3] + ". " + who +
+        (many ? "They all stare straight at the camera with dead-serious, unimpressed expressions. "
+              : "The animal stares straight at the camera with a dead-serious, unimpressed expression. ") +
+        "Setting: " + f[4] + ". " +
+        "Accurate animal anatomy and fur, weapons correctly proportioned and recognisable, absurd deadpan humour. " +
+        "No humans in focus, no text, no captions, no watermark, no logos. " +
+        "Leave clear space at the top and bottom of the frame for meme captions. " +
+        "Aspect ratio " + el.ratio.value + ".";
+    }
+    var q = encodeURIComponent(lead() + el.prompt.value);
     $("toGpt").href = "https://chatgpt.com/?q=" + q;
     $("toGrok").href = "https://grok.com/?q=" + q;
   }
@@ -601,6 +831,7 @@ footer p { margin: 0; }
     fill(el.faction, simple(FACTIONS));
     fill(el.style, simple(STYLES));
     fill(el.ratio, simple(RATIOS));
+    fill(el.emote, simple(EMOTES));
     fillGroup(); fillWeapons();
     if (first || el.topText.value === T[other].defTop) el.topText.value = T[lang].defTop;
     if (first || el.bottomText.value === T[other].defBottom) el.bottomText.value = T[lang].defBottom;
@@ -625,24 +856,27 @@ footer p { margin: 0; }
     var w = find(WEAPONS, el.weapon.value); setMode("type", w[2], w[0]);
   });
   el.group.addEventListener("change", function () { fillWeapons(); buildPrompt(); });
-  ["species", "weapon", "faction", "style", "ratio"].forEach(function (k) {
+  $("outImage").addEventListener("click", function () { setOut("image"); });
+  $("outVideo").addEventListener("click", function () { setOut("video"); });
+  ["species", "weapon", "faction", "style", "ratio", "emote"].forEach(function (k) {
     el[k].addEventListener("change", function () { status("copyStatus", ""); buildPrompt(); });
   });
   $("random").addEventListener("click", function () {
-    var w = pick(WEAPONS);
-    el.species.value = pick(SPECIES)[0];
+    squad = squad.map(function () { return { s: pick(SPECIES)[0], w: pick(WEAPONS)[0] }; });
     el.faction.value = pick(FACTIONS)[0];
     el.style.value = pick(STYLES)[0];
-    setMode(mode, mode === "nation" ? w[1] : w[2], w[0]);
-    status("copyStatus", "");
+    el.emote.value = pick(EMOTES)[0];
+    selectMember(active);
   });
   $("copy").addEventListener("click", function () {
     var done = function () { status("copyStatus", T[lang].copied); };
     var fail = function () { el.prompt.focus(); el.prompt.select(); status("copyStatus", T[lang].copyFail, true); };
     try { navigator.clipboard.writeText(el.prompt.value).then(done, fail); } catch (e) { fail(); }
   });
-  $("toGemini").addEventListener("click", function () {
-    try { navigator.clipboard.writeText("Generate an image: " + el.prompt.value).then(function () { status("copyStatus", T[lang].copied); }, function () {}); } catch (e) {}
+  ["toGemini", "toHiggs"].forEach(function (id) {
+    $(id).addEventListener("click", function () {
+      try { navigator.clipboard.writeText(lead() + el.prompt.value).then(function () { status("copyStatus", T[lang].copied); }, function () {}); } catch (e) {}
+    });
   });
   $("file").addEventListener("change", function (e) { loadFile(e.target.files && e.target.files[0]); });
   el.topText.addEventListener("input", draw);
@@ -651,9 +885,8 @@ footer p { margin: 0; }
 
   /* ---------- Start: opens on the combo from the photo that inspired the site ---------- */
   applyLang(true);
-  el.species.value = "babychimp";
   el.faction.value = "guerrilla";
-  setMode("nation", "ru", "PKM");
+  selectMember(0);
   if (document.fonts && document.fonts.load) {
     Promise.all([document.fonts.load("40px Anton"), document.fonts.load("40px 'Black Ops One'")]).then(draw, draw);
   }
