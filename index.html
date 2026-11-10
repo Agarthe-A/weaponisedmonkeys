@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WeaponisedMonkeys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Black+Ops+One&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout: one column, three numbered steps stacked like stencilled ammo crates. Single theme by choice. */
+  color-scheme: dark;
+  --drab: #262b1e;        /* page background, olive drab */
+  --crate: #343b28;       /* panels */
+  --crate-edge: #4c5539;  /* borders, dividers */
+  --sand: #ece4c8;        /* text */
+  --sand-dim: #b3ad92;    /* secondary text */
+  --banana: #ffd23f;      /* accent */
+  --ink: #15180f;         /* text on accent, inputs */
+  --alert: #ff8a5c;       /* error messages */
+  --font-display: "Black Ops One", "Stencil", "Impact", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--drab);
+  color: var(--sand);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+}
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 3px solid var(--banana);
+  padding-bottom: 14px;
+}
+h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 8vw, 2.9rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+h1 span { color: var(--banana); display: block; }
+.tagline { margin: 0; color: var(--sand-dim); font-size: 0.95rem; max-width: 34em; }
+.lang { display: flex; flex: none; border: 2px solid var(--crate-edge); border-radius: 4px; overflow: hidden; }
+.lang button {
+  font: 600 0.85rem var(--font-body);
+  background: transparent; color: var(--sand-dim);
+  border: 0; padding: 8px 10px; cursor: pointer;
+}
+.lang button[aria-pressed="true"] { background: var(--banana); color: var(--ink); }
+
+section {
+  background: var(--crate);
+  border: 1px solid var(--crate-edge);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+  display: flex; align-items: baseline; gap: 10px;
+}
+h2 .num { color: var(--banana); }
+.help { margin: 0; color: var(--sand-dim); font-size: 0.9rem; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.full { grid-column: 1 / -1; }
+@media (max-width: 440px) { .grid { grid-template-columns: 1fr; } }
+
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+label, .label {
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--sand-dim);
+}
+select, input[type="text"], textarea {
+  width: 100%;
+  font: 500 1rem var(--font-body);
+  color: var(--sand);
+  background: var(--ink);
+  border: 1px solid var(--crate-edge);
+  border-radius: 4px;
+  padding: 11px 12px;
+}
+select { appearance: none; -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--banana) 50%), linear-gradient(135deg, var(--banana) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+  background-size: 6px 6px; background-repeat: no-repeat; padding-right: 34px;
+}
+textarea {
+  font: 400 0.88rem/1.5 var(--font-mono);
+  min-height: 190px; resize: vertical;
+}
+:focus-visible { outline: 3px solid var(--banana); outline-offset: 2px; }
+
+.seg { display: flex; border: 1px solid var(--crate-edge); border-radius: 4px; overflow: hidden; }
+.seg button {
+  flex: 1; font: 600 0.95rem var(--font-body);
+  background: var(--ink); color: var(--sand-dim);
+  border: 0; padding: 11px 8px; cursor: pointer;
+}
+.seg button + button { border-left: 1px solid var(--crate-edge); }
+.seg button[aria-pressed="true"] { background: var(--sand); color: var(--ink); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  font: 400 1rem var(--font-display);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  border-radius: 4px; padding: 13px 18px; cursor: pointer;
+  border: 2px solid var(--banana);
+  background: var(--banana); color: var(--ink);
+  flex: 1 1 auto; text-align: center;
+}
+.btn.ghost { background: transparent; color: var(--banana); }
+a.btn { text-decoration: none; display: inline-block; }
+.send { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.send .btn { padding: 12px 6px; font-size: 0.92rem; }
+@media (max-width: 440px) { .send { grid-template-columns: 1fr; } }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+@media (prefers-reduced-motion: reduce) { .btn:active:not(:disabled) { transform: none; } }
+
+.status { min-height: 1.3em; margin: 0; font-size: 0.9rem; color: var(--banana); }
+.status.err { color: var(--alert); }
+
+.stage { background: var(--ink); border: 1px solid var(--crate-edge); border-radius: 4px; padding: 8px; }
+canvas, #fallbackImg { display: block; width: 100%; height: auto; max-width: 100%; border-radius: 2px; }
+#fallbackWrap { display: none; flex-direction: column; gap: 8px; }
+#fallbackWrap.on { display: flex; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.filebtn { position: relative; display: block; }
+.filebtn input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.filebtn:focus-within .btn { outline: 3px solid var(--banana); outline-offset: 2px; }
+.filebtn .btn { display: block; }
+footer { color: var(--sand-dim); font-size: 0.8rem; }
+footer p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Weaponised <span>Monkeys</span></h1>
+      <p class="tagline" data-i18n="tagline"></p>
+    </div>
+    <div class="lang" role="group" aria-label="Langue / Language">
+      <button type="button" id="langFr" aria-pressed="true">FR</button>
+      <button type="button" id="langEn" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-brief">
+    <h2 id="h-brief"><span class="num">01</span><span data-i18n="s1"></span></h2>
+    <div class="grid">
+      <div class="field full">
+        <label for="species" data-i18n="species"></label>
+        <select id="species"></select>
+      </div>
+      <div class="field full">
+        <span class="label" id="modeLabel" data-i18n="weaponBy"></span>
+        <div class="seg" role="group" aria-labelledby="modeLabel">
+          <button type="button" id="modeNation" aria-pressed="true" data-i18n="byNation"></button>
+          <button type="button" id="modeType" aria-pressed="false" data-i18n="byType"></button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="group" id="groupLabel"></label>
+        <select id="group"></select>
+      </div>
+      <div class="field">
+        <label for="weapon" data-i18n="weapon"></label>
+        <select id="weapon"></select>
+      </div>
+      <div class="field full">
+        <label for="faction" data-i18n="faction"></label>
+        <select id="faction"></select>
+      </div>
+      <div class="field">
+        <label for="style" data-i18n="style"></label>
+        <select id="style"></select>
+      </div>
+      <div class="field">
+        <label for="ratio" data-i18n="ratio"></label>
+        <select id="ratio"></select>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="random" data-i18n="random"></button>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-prompt">
+    <h2 id="h-prompt"><span class="num">02</span><span data-i18n="s2"></span></h2>
+    <p class="help" data-i18n="promptHelp"></p>
+    <div class="field">
+      <label for="prompt" class="visually-hidden" data-i18n="s2"></label>
+      <textarea id="prompt" readonly spellcheck="false"></textarea>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="copy" data-i18n="copy"></button>
+    </div>
+    <p class="status" id="copyStatus" role="status" aria-live="polite"></p>
+    <span class="label" data-i18n="sendTo"></span>
+    <div class="send">
+      <a class="btn ghost" id="toGpt" target="_blank" rel="noopener" href="https://chatgpt.com/">ChatGPT</a>
+      <a class="btn ghost" id="toGrok" target="_blank" rel="noopener" href="https://grok.com/">Grok</a>
+      <a class="btn ghost" id="toGemini" target="_blank" rel="noopener" href="https://gemini.google.com/app">Gemini</a>
+    </div>
+    <p class="help" data-i18n="sendHelp"></p>
+  </section>
+
+  <section aria-labelledby="h-meme">
+    <h2 id="h-meme"><span class="num">03</span><span data-i18n="s3"></span></h2>
+    <p class="help" data-i18n="memeHelp"></p>
+    <label class="filebtn">
+      <input type="file" id="file" accept="image/*">
+      <span class="btn ghost" data-i18n="import"></span>
+    </label>
+    <div class="grid">
+      <div class="field full">
+        <label for="topText" data-i18n="top"></label>
+        <input type="text" id="topText" autocomplete="off">
+      </div>
+      <div class="field full">
+        <label for="bottomText" data-i18n="bottom"></label>
+        <input type="text" id="bottomText" autocomplete="off">
+      </div>
+    </div>
+    <div class="stage"><canvas id="canvas" width="1080" height="1350"></canvas></div>
+    <div class="actions">
+      <button type="button" class="btn" id="save" data-i18n="save" disabled></button>
+    </div>
+    <p class="status" id="saveStatus" role="status" aria-live="polite"></p>
+    <div id="fallbackWrap">
+      <p class="help" data-i18n="saveFallback"></p>
+      <div class="stage"><img id="fallbackImg" alt=""></div>
+    </div>
+  </section>
+
+  <footer><p data-i18n="footer"></p></footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Data: [id, fr, en, prompt fragment] ---------- */
+  var SPECIES = [
+    ["chimp", "Chimpanzé", "Chimpanzee", "an adult chimpanzee"],
+    ["babychimp", "Bébé chimpanzé", "Baby chimpanzee", "a baby chimpanzee with big ears and wide eyes"],
+    ["gorilla", "Gorille dos argenté", "Silverback gorilla", "a massive silverback gorilla"],
+    ["orangutan", "Orang-outan", "Orangutan", "a Bornean orangutan with wide cheek pads and long orange hair"],
+    ["bonobo", "Bonobo", "Bonobo", "a bonobo"],
+    ["mandrill", "Mandrill", "Mandrill", "a mandrill with a vivid red and blue face"],
+    ["baboon", "Babouin", "Baboon", "an olive baboon"],
+    ["capuchin", "Capucin", "Capuchin", "a white-faced capuchin monkey"],
+    ["macaque", "Macaque japonais", "Japanese macaque", "a Japanese macaque with a red face and thick grey fur"],
+    ["proboscis", "Nasique", "Proboscis monkey", "a proboscis monkey with a large drooping nose"],
+    ["snubnosed", "Rhinopithèque doré", "Golden snub-nosed monkey", "a golden snub-nosed monkey with a blue face"],
+    ["squirrel", "Singe-écureuil", "Squirrel monkey", "a small squirrel monkey"],
+    ["marmoset", "Ouistiti", "Marmoset", "a tiny common marmoset with white ear tufts"],
+    ["gibbon", "Gibbon", "Gibbon", "a white-handed gibbon with very long arms"],
+    ["howler", "Singe hurleur", "Howler monkey", "a howler monkey, mouth open mid-roar"],
+    ["tamarin", "Tamarin empereur", "Emperor tamarin", "an emperor tamarin with a long white moustache"]
+  ];
+
+  var NATIONS = [
+    ["ru", "Russie / URSS", "Russia / USSR"],
+    ["us", "États-Unis", "United States"],
+    ["fr", "France", "France"],
+    ["de", "Allemagne", "Germany"],
+    ["be", "Belgique", "Belgium"],
+    ["il", "Israël", "Israel"],
+    ["uk", "Royaume-Uni", "United Kingdom"],
+    ["at", "Autriche", "Austria"],
+    ["it", "Italie", "Italy"],
+    ["cn", "Chine", "China"],
+    ["ch", "Suisse", "Switzerland"],
+    ["cz", "Tchéquie", "Czechia"],
+    ["se", "Suède", "Sweden"]
+  ];
+
+  var TYPES = [
+    ["ar", "Fusil d'assaut", "Assault rifle", "assault rifle"],
+    ["mg", "Mitrailleuse", "Machine gun", "belt-fed machine gun"],
+    ["sn", "Fusil de précision", "Sniper rifle", "sniper rifle"],
+    ["smg", "Pistolet-mitrailleur", "Submachine gun", "submachine gun"],
+    ["pi", "Pistolet", "Pistol", "pistol"],
+    ["sg", "Fusil à pompe", "Shotgun", "shotgun"],
+    ["rl", "Lance-roquettes", "Rocket launcher", "shoulder-fired launcher"]
+  ];
+
+  /* [name, nation, type] */
+  var WEAPONS = [
+    ["AK-47", "ru", "ar"], ["AK-74M", "ru", "ar"], ["PKM", "ru", "mg"], ["SVD Dragunov", "ru", "sn"],
+    ["PP-19 Bizon", "ru", "smg"], ["Makarov PM", "ru", "pi"], ["Saiga-12", "ru", "sg"], ["RPG-7", "ru", "rl"],
+    ["M4A1", "us", "ar"], ["M16A4", "us", "ar"], ["M249 SAW", "us", "mg"], ["M60", "us", "mg"],
+    ["Barrett M82", "us", "sn"], ["Thompson M1928", "us", "smg"], ["Colt M1911", "us", "pi"],
+    ["Mossberg 590", "us", "sg"], ["FGM-148 Javelin", "us", "rl"],
+    ["FAMAS", "fr", "ar"], ["AA-52", "fr", "mg"], ["FR-F2", "fr", "sn"], ["MAT-49", "fr", "smg"],
+    ["PAMAS G1", "fr", "pi"], ["LRAC F1", "fr", "rl"],
+    ["HK G36", "de", "ar"], ["HK416", "de", "ar"], ["MG3", "de", "mg"], ["HK MP5", "de", "smg"],
+    ["HK USP", "de", "pi"], ["Panzerfaust 3", "de", "rl"],
+    ["FN FAL", "be", "ar"], ["FN SCAR-L", "be", "ar"], ["FN MAG", "be", "mg"], ["FN Minimi", "be", "mg"],
+    ["FN P90", "be", "smg"], ["Browning Hi-Power", "be", "pi"],
+    ["IMI Galil", "il", "ar"], ["Tavor TAR-21", "il", "ar"], ["IWI Negev", "il", "mg"], ["Uzi", "il", "smg"],
+    ["Desert Eagle", "il", "pi"],
+    ["L85A2", "uk", "ar"], ["Bren", "uk", "mg"], ["L96A1", "uk", "sn"], ["Sten", "uk", "smg"],
+    ["Steyr AUG", "at", "ar"], ["Steyr SSG 69", "at", "sn"], ["Glock 17", "at", "pi"],
+    ["Beretta ARX160", "it", "ar"], ["Beretta 92", "it", "pi"], ["Benelli M4", "it", "sg"], ["Franchi SPAS-12", "it", "sg"],
+    ["QBZ-95", "cn", "ar"], ["Type 56", "cn", "ar"],
+    ["SIG SG 550", "ch", "ar"], ["SIG P226", "ch", "pi"],
+    ["Vz. 58", "cz", "ar"], ["Škorpion vz. 61", "cz", "smg"], ["CZ 75", "cz", "pi"],
+    ["Carl Gustaf M4", "se", "rl"], ["AT4", "se", "rl"]
+  ];
+
+  /* [id, fr, en, outfit, setting] */
+  var FACTIONS = [
+    ["narco", "Narcotrafiquants", "Drug cartel",
+      "dressed as a cartel enforcer: open silk shirt, heavy gold chains, tactical vest, aviator sunglasses",
+      "a hidden jungle camp with stacked burlap bales, tarps and a mud-splattered pickup truck"],
+    ["insurgent", "Terroristes / insurgés", "Terrorists / insurgents",
+      "dressed as a desert insurgent fighter: checkered scarf wrapped around the head, chest rig full of magazines, dusty fatigues, no flags or insignia",
+      "a sun-baked mud-brick compound, a battered pickup truck in the background, harsh midday light"],
+    ["swat", "Groupe d'intervention d'élite", "Elite tactical unit",
+      "wearing black tactical police gear: ballistic helmet with raised visor, plate carrier, knee pads, balaclava, generic patches with no real insignia",
+      "a dim concrete stairwell, stacked up next to a door, flashlight beams cutting through smoke"],
+    ["sf", "Forces spéciales", "Special forces",
+      "wearing multicam combat uniform, helmet with night-vision goggles flipped up, radio headset",
+      "a helicopter landing zone at dusk, rotor wash kicking up dust"],
+    ["guerrilla", "Guérilla de jungle", "Jungle guerrilla",
+      "wearing mismatched camouflage fatigues, a beret and rubber sandals",
+      "a rebel camp of thatched huts on red dirt in a tropical forest"],
+    ["pmc", "Mercenaires privés", "Private contractors",
+      "dressed as a private military contractor: baseball cap, wraparound sunglasses, khaki shirt, plate carrier, shemagh around the neck",
+      "a dusty convoy checkpoint next to armoured SUVs"],
+    ["pirate", "Pirates", "Pirates",
+      "dressed as a modern sea pirate: faded football shirt, bandana, ammunition belt across the chest",
+      "standing on a small wooden skiff on open sea, a cargo ship on the horizon"],
+    ["mafia", "Mafia années 30", "1930s mafia",
+      "dressed as a 1930s gangster: pinstripe suit, fedora, cigar",
+      "a rainy city alley at night beside a vintage black sedan, neon reflections on wet pavement"]
+  ];
+
+  /* [id, fr, en, prompt lead] */
+  var STYLES = [
+    ["phone", "Photo de téléphone amateur", "Amateur phone photo",
+      "Candid amateur smartphone photo, slightly blurry, harsh natural light, low-resolution 2010s phone camera look, shot from above"],
+    ["press", "Photojournalisme", "Photojournalism",
+      "Award-winning war photojournalism, 35mm lens, natural light, shallow depth of field, gritty documentary realism"],
+    ["movie", "Affiche de film d'action", "Action movie poster",
+      "Cinematic action movie still, dramatic rim lighting, anamorphic lens flares, teal and orange grade, ultra detailed"],
+    ["bodycam", "Caméra embarquée VHS", "VHS bodycam",
+      "Grainy 1990s VHS bodycam footage, fisheye distortion, timestamp-free frame, washed-out colours, motion blur"],
+    ["cartoon", "Bande dessinée", "Comic book",
+      "Bold comic book illustration, thick ink outlines, halftone shading, saturated flat colours"]
+  ];
+
+  var RATIOS = [
+    ["4:5", "Portrait 4:5", "Portrait 4:5"],
+    ["1:1", "Carré 1:1", "Square 1:1"],
+    ["16:9", "Paysage 16:9", "Landscape 16:9"],
+    ["9:16", "Story 9:16", "Story 9:16"]
+  ];
+
+  var T = {
+    fr: {
+      tagline: "Choisis ton singe, son arme et son camp. Le site écrit le prompt, ton IA d'image fait la photo, tu ajoutes la légende.",
+      s1: "Brief de mission", species: "Espèce de singe", weaponBy: "Choisir l'arme", byNation: "Par nation", byType: "Par type",
+      nation: "Nation", type: "Type d'arme", weapon: "Arme", faction: "Camp des combattants", style: "Style d'image", ratio: "Format",
+      random: "Tirage au hasard",
+      s2: "Prompt généré",
+      promptHelp: "Envoie ce prompt à ton IA d'image, ou copie-le pour un autre outil (Midjourney…). Il est en anglais, la langue que ces outils comprennent le mieux.",
+      sendTo: "Envoyer directement à",
+      sendHelp: "ChatGPT et Grok s'ouvrent avec le prompt déjà rempli. Pour Gemini, le prompt est copié : colle-le à l'arrivée.",
+      copy: "Copier le prompt", copied: "Prompt copié.", copyFail: "Copie bloquée. Le texte est sélectionné : copie-le à la main.",
+      s3: "Atelier meme",
+      memeHelp: "Importe l'image obtenue, écris tes légendes, enregistre le PNG.",
+      import: "Importer une image", top: "Texte du haut", bottom: "Texte du bas",
+      save: "Enregistrer le PNG", saved: "Meme enregistré.", declined: "Enregistrement annulé.",
+      saveErr: "L'enregistrement a échoué. Utilise l'image ci-dessous.",
+      saveFallback: "Appuie longuement sur l'image (ou clic droit) pour l'enregistrer.",
+      imgErr: "Ce fichier n'est pas une image lisible. Essaie un JPG ou un PNG.",
+      placeholder: "IMPORTE TON IMAGE",
+      defTop: "QUAND LE ZOO FERME À 18H", defBottom: "ET QUE TU AS D'AUTRES PROJETS",
+      footer: "Parodie. Aucun singe n'a été armé pendant la fabrication de ce site."
+    },
+    en: {
+      tagline: "Pick your monkey, its weapon and its side. The site writes the prompt, your image AI takes the picture, you add the caption.",
+      s1: "Mission brief", species: "Monkey species", weaponBy: "Pick the weapon", byNation: "By nation", byType: "By type",
+      nation: "Nation", type: "Weapon type", weapon: "Weapon", faction: "Fighter faction", style: "Image style", ratio: "Format",
+      random: "Randomise",
+      s2: "Generated prompt",
+      promptHelp: "Send this prompt to your image AI, or copy it for another tool (Midjourney…).",
+      sendTo: "Send straight to",
+      sendHelp: "ChatGPT and Grok open with the prompt already filled in. For Gemini the prompt is copied: paste it when you get there.",
+      copy: "Copy prompt", copied: "Prompt copied.", copyFail: "Copy was blocked. The text is selected: copy it by hand.",
+      s3: "Meme workshop",
+      memeHelp: "Import the image you got, write your captions, save the PNG.",
+      import: "Import an image", top: "Top text", bottom: "Bottom text",
+      save: "Save PNG", saved: "Meme saved.", declined: "Save cancelled.",
+      saveErr: "Saving failed. Use the image below.",
+      saveFallback: "Long-press the image (or right-click) to save it.",
+      imgErr: "This file is not a readable image. Try a JPG or PNG.",
+      placeholder: "IMPORT YOUR IMAGE",
+      defTop: "WHEN THE ZOO CLOSES AT 6", defBottom: "AND YOU HAVE OTHER PLANS",
+      footer: "Parody. No monkeys were armed in the making of this site."
+    }
+  };
+
+  /* ---------- State ---------- */
+  var lang = "fr";
+  try { var saved = localStorage.getItem("wm-lang"); if (saved === "en" || saved === "fr") lang = saved; } catch (e) {}
+  var mode = "nation";
+  var li = function () { return lang === "fr" ? 1 : 2; };
+  var $ = function (id) { return document.getElementById(id); };
+  var el = {
+    species: $("species"), group: $("group"), weapon: $("weapon"), faction: $("faction"),
+    style: $("style"), ratio: $("ratio"), prompt: $("prompt"), canvas: $("canvas"),
+    topText: $("topText"), bottomText: $("bottomText"), save: $("save")
+  };
+  var ctx = el.canvas.getContext("2d");
+  var img = null;
+
+  function find(list, id) { for (var i = 0; i < list.length; i++) if (list[i][0] === id) return list[i]; return list[0]; }
+  function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
+
+  function fill(select, items, keep) {
+    var prev = keep === undefined ? select.value : keep;
+    select.textContent = "";
+    items.forEach(function (it) {
+      var o = document.createElement("option");
+      o.value = it.value; o.textContent = it.label;
+      select.appendChild(o);
+    });
+    if (items.some(function (it) { return it.value === prev; })) select.value = prev;
+  }
+  function simple(list) { return list.map(function (r) { return { value: r[0], label: r[li()] }; }); }
+
+  function fillGroup(keep) {
+    $("groupLabel").textContent = T[lang][mode === "nation" ? "nation" : "type"];
+    fill(el.group, simple(mode === "nation" ? NATIONS : TYPES), keep);
+  }
+  function fillWeapons(keep) {
+    var g = el.group.value;
+    var items = WEAPONS.filter(function (w) { return (mode === "nation" ? w[1] : w[2]) === g; }).map(function (w) {
+      var extra = mode === "nation" ? find(TYPES, w[2])[li()] : find(NATIONS, w[1])[li()];
+      return { value: w[0], label: w[0] + " · " + extra };
+    });
+    fill(el.weapon, items, keep);
+  }
+
+  function buildPrompt() {
+    var sp = find(SPECIES, el.species.value);
+    var w = find(WEAPONS, el.weapon.value);
+    var ty = find(TYPES, w[2]);
+    var f = find(FACTIONS, el.faction.value);
+    var st = find(STYLES, el.style.value);
+    var hold = w[2] === "pi" ? "holding a " + w[0] + " pistol in one hand"
+      : w[2] === "rl" ? "resting a " + w[0] + " " + ty[3] + " on its shoulder"
+      : "gripping a " + w[0] + " " + ty[3] + " with both hands";
+    el.prompt.value =
+      st[3] + ". " +
+      "The subject is " + sp[3] + ", " + f[3] + ", " + hold + ". " +
+      "The animal stares straight at the camera with a dead-serious, unimpressed expression. " +
+      "Setting: " + f[4] + ". " +
+      "Accurate animal anatomy and fur, the weapon is correctly proportioned and recognisable, absurd deadpan humour. " +
+      "No humans in focus, no text, no captions, no watermark, no logos. " +
+      "Leave clear space at the top and bottom of the frame for meme captions. " +
+      "Aspect ratio " + el.ratio.value + ".";
+    var q = encodeURIComponent("Generate an image: " + el.prompt.value);
+    $("toGpt").href = "https://chatgpt.com/?q=" + q;
+    $("toGrok").href = "https://grok.com/?q=" + q;
+  }
+
+  /* ---------- Meme canvas ---------- */
+  function wrap(text, maxW) {
+    var words = text.split(/\s+/), lines = [], line = "";
+    words.forEach(function (word) {
+      var test = line ? line + " " + word : word;
+      if (line && ctx.measureText(test).width > maxW) { lines.push(line); line = word; } else { line = test; }
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+  function caption(text, pos) {
+    text = (text || "").trim().toUpperCase();
+    if (!text) return;
+    var W = el.canvas.width, H = el.canvas.height;
+    var size = Math.round(W / 9), lines;
+    for (;;) {
+      ctx.font = size + "px Anton, Impact, 'Arial Narrow', sans-serif";
+      lines = wrap(text, W * 0.92);
+      var widest = Math.max.apply(null, lines.map(function (l) { return ctx.measureText(l).width; }));
+      if ((lines.length <= 3 && widest <= W * 0.94) || size < W / 30) break;
+      size = Math.round(size * 0.9);
+    }
+    var lh = size * 1.14, pad = H * 0.025;
+    var y = pos === "top" ? pad : H - pad - lines.length * lh;
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.lineJoin = "round"; ctx.miterLimit = 2;
+    ctx.lineWidth = Math.max(3, size / 6);
+    ctx.strokeStyle = "#000"; ctx.fillStyle = "#fff";
+    lines.forEach(function (l, i) {
+      ctx.strokeText(l, W / 2, y + i * lh);
+      ctx.fillText(l, W / 2, y + i * lh);
+    });
+  }
+  function draw() {
+    var W = el.canvas.width, H = el.canvas.height;
+    if (img) {
+      ctx.drawImage(img, 0, 0, W, H);
+    } else {
+      ctx.fillStyle = "#4a5238"; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "#414931"; ctx.lineWidth = 46;
+      for (var x = -H; x < W; x += 130) { ctx.beginPath(); ctx.moveTo(x, H); ctx.lineTo(x + H, 0); ctx.stroke(); }
+      ctx.fillStyle = "#ece4c8"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = Math.round(W / 14) + "px 'Black Ops One', Impact, sans-serif";
+      ctx.fillText(T[lang].placeholder, W / 2, H / 2);
+    }
+    caption(el.topText.value, "top");
+    caption(el.bottomText.value, "bottom");
+    if ($("fallbackWrap").classList.contains("on")) showFallback();
+  }
+  function loadFile(file) {
+    if (!file) return;
+    var url = URL.createObjectURL(file);
+    var im = new Image();
+    im.onload = function () {
+      var max = 1600, s = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
+      el.canvas.width = Math.round(im.naturalWidth * s);
+      el.canvas.height = Math.round(im.naturalHeight * s);
+      img = im; el.save.disabled = false; status("saveStatus", "");
+      draw();
+    };
+    im.onerror = function () { URL.revokeObjectURL(url); status("saveStatus", T[lang].imgErr, true); };
+    im.src = url;
+  }
+  function status(id, msg, err) { var n = $(id); n.textContent = msg; n.classList.toggle("err", !!err); }
+  function showFallback() {
+    try { $("fallbackImg").src = el.canvas.toDataURL("image/png"); $("fallbackWrap").classList.add("on"); } catch (e) {}
+  }
+
+  var downloads = null;
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("downloads").then(function (d) { downloads = d; }).catch(function () {});
+  }
+  function saveMeme() {
+    if (!img) return;
+    el.canvas.toBlob(function (blob) {
+      if (blob && !window.claude) {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = "weaponised-monkey.png";
+        document.body.appendChild(a); a.click(); a.remove();
+        status("saveStatus", T[lang].saved); return;
+      }
+      if (!blob || !downloads) { showFallback(); return; }
+      downloads.save({ filename: "weaponised-monkey.png", data: blob }).then(function () {
+        status("saveStatus", T[lang].saved);
+      }).catch(function (e) {
+        if (e && e.code === "declined") { status("saveStatus", T[lang].declined); }
+        else { status("saveStatus", T[lang].saveErr, true); showFallback(); }
+      });
+    }, "image/png");
+  }
+
+  /* ---------- Language ---------- */
+  function applyLang(first) {
+    var other = lang === "fr" ? "en" : "fr";
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(function (n) { n.textContent = T[lang][n.getAttribute("data-i18n")]; });
+    $("langFr").setAttribute("aria-pressed", String(lang === "fr"));
+    $("langEn").setAttribute("aria-pressed", String(lang === "en"));
+    fill(el.species, simple(SPECIES));
+    fill(el.faction, simple(FACTIONS));
+    fill(el.style, simple(STYLES));
+    fill(el.ratio, simple(RATIOS));
+    fillGroup(); fillWeapons();
+    if (first || el.topText.value === T[other].defTop) el.topText.value = T[lang].defTop;
+    if (first || el.bottomText.value === T[other].defBottom) el.bottomText.value = T[lang].defBottom;
+    status("copyStatus", "");
+    buildPrompt(); draw();
+  }
+  function setLang(l) { lang = l; try { localStorage.setItem("wm-lang", l); } catch (e) {} applyLang(false); }
+  function setMode(m, groupId, weaponId) {
+    mode = m;
+    $("modeNation").setAttribute("aria-pressed", String(m === "nation"));
+    $("modeType").setAttribute("aria-pressed", String(m === "type"));
+    fillGroup(groupId); fillWeapons(weaponId); buildPrompt();
+  }
+
+  /* ---------- Events ---------- */
+  $("langFr").addEventListener("click", function () { setLang("fr"); });
+  $("langEn").addEventListener("click", function () { setLang("en"); });
+  $("modeNation").addEventListener("click", function () {
+    var w = find(WEAPONS, el.weapon.value); setMode("nation", w[1], w[0]);
+  });
+  $("modeType").addEventListener("click", function () {
+    var w = find(WEAPONS, el.weapon.value); setMode("type", w[2], w[0]);
+  });
+  el.group.addEventListener("change", function () { fillWeapons(); buildPrompt(); });
+  ["species", "weapon", "faction", "style", "ratio"].forEach(function (k) {
+    el[k].addEventListener("change", function () { status("copyStatus", ""); buildPrompt(); });
+  });
+  $("random").addEventListener("click", function () {
+    var w = pick(WEAPONS);
+    el.species.value = pick(SPECIES)[0];
+    el.faction.value = pick(FACTIONS)[0];
+    el.style.value = pick(STYLES)[0];
+    setMode(mode, mode === "nation" ? w[1] : w[2], w[0]);
+    status("copyStatus", "");
+  });
+  $("copy").addEventListener("click", function () {
+    var done = function () { status("copyStatus", T[lang].copied); };
+    var fail = function () { el.prompt.focus(); el.prompt.select(); status("copyStatus", T[lang].copyFail, true); };
+    try { navigator.clipboard.writeText(el.prompt.value).then(done, fail); } catch (e) { fail(); }
+  });
+  $("toGemini").addEventListener("click", function () {
+    try { navigator.clipboard.writeText("Generate an image: " + el.prompt.value).then(function () { status("copyStatus", T[lang].copied); }, function () {}); } catch (e) {}
+  });
+  $("file").addEventListener("change", function (e) { loadFile(e.target.files && e.target.files[0]); });
+  el.topText.addEventListener("input", draw);
+  el.bottomText.addEventListener("input", draw);
+  el.save.addEventListener("click", saveMeme);
+
+  /* ---------- Start: opens on the combo from the photo that inspired the site ---------- */
+  applyLang(true);
+  el.species.value = "babychimp";
+  el.faction.value = "guerrilla";
+  setMode("nation", "ru", "PKM");
+  if (document.fonts && document.fonts.load) {
+    Promise.all([document.fonts.load("40px Anton"), document.fonts.load("40px 'Black Ops One'")]).then(draw, draw);
+  }
+})();
+</script>
+</body>
+</html>
