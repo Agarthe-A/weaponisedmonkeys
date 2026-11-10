@@ -193,6 +193,11 @@ footer p { margin: 0; }
       </div>
     </div>
     <div class="field">
+      <label for="crowd" data-i18n="crowd"></label>
+      <select id="crowd"></select>
+      <p class="help" data-i18n="crowdHelp"></p>
+    </div>
+    <div class="field">
       <span class="label" id="squadLabel" data-i18n="squad"></span>
       <div class="squad" id="squad" role="group" aria-labelledby="squadLabel"></div>
       <p class="help" data-i18n="squadHelp"></p>
@@ -220,6 +225,18 @@ footer p { margin: 0; }
       <div class="field full">
         <label for="faction" data-i18n="faction"></label>
         <select id="faction"></select>
+      </div>
+      <div class="field full">
+        <label for="scenario" data-i18n="scenario"></label>
+        <select id="scenario"></select>
+      </div>
+      <div class="field">
+        <label for="decor" data-i18n="decor"></label>
+        <select id="decor"></select>
+      </div>
+      <div class="field">
+        <label for="moment" data-i18n="moment"></label>
+        <select id="moment"></select>
       </div>
       <div class="field full">
         <span class="label" id="outLabel" data-i18n="output"></span>
@@ -500,6 +517,144 @@ footer p { margin: 0; }
       "inside a bank vault, duffel bags overflowing with banknotes, alarm lights flashing red"]
   ];
 
+  /* [id, fr, en, total (0 = squad only, -1 = army)] */
+  var CROWDS = [
+    ["none", "Escouade seule (1 à 5)", "Squad only (1 to 5)", 0],
+    ["8", "Groupe de 8", "Group of 8", 8],
+    ["12", "Section de 12", "Section of 12", 12],
+    ["20", "Peloton de 20", "Platoon of 20", 20],
+    ["50", "Compagnie de 50", "Company of 50", 50],
+    ["army", "Toute une armée", "A whole army", -1]
+  ];
+
+  /* [id, fr, en, scene for one animal, scene for several] */
+  var SCENARIOS = [
+    ["portrait", "Portrait face caméra", "Portrait facing the camera",
+      "The animal stares straight at the camera with a dead-serious, unimpressed expression",
+      "They all stare straight at the camera with dead-serious, unimpressed expressions"],
+    ["selfie", "Selfie à bout de bras", "Arm's-length selfie",
+      "The animal is taking a selfie at arm's length, the frame slightly tilted, weapon held up proudly in the other hand, completely straight-faced",
+      "One of them is taking a group selfie at arm's length, the frame slightly tilted, the others crowding in behind with their weapons raised, all completely straight-faced"],
+    ["squadphoto", "Photo de groupe officielle", "Official unit photo",
+      "The animal poses stiffly for an official service portrait, chin up, weapon held across the chest",
+      "They pose for an official unit photo, front row kneeling and back row standing, weapons held across the chest, chins up"],
+    ["patrol", "Patrouille en file", "Patrol in single file",
+      "The animal is on patrol, walking carefully towards the camera, weapon at the low ready, eyes scanning",
+      "They are on patrol in single file, walking carefully towards the camera, weapons at the low ready, eyes scanning"],
+    ["ambush", "Embuscade", "Ambush",
+      "The animal lies in ambush, half hidden behind cover, weapon aimed down the path, perfectly still",
+      "They lie in ambush, half hidden behind cover on both sides of a path, weapons aimed, perfectly still"],
+    ["briefing", "Briefing autour d'une carte", "Briefing around a map",
+      "The animal studies a creased paper map spread on an ammunition crate, one finger on the map, weapon slung on its back",
+      "They are huddled around a creased paper map spread on an ammunition crate, one of them pointing at it, weapons slung on their backs"],
+    ["breach", "Entrée dynamique", "Door breach",
+      "The animal is flattened against a wall beside a door, one hand raised in a silent countdown, weapon ready",
+      "They are stacked up in a line against a wall beside a door, the first one raising a hand in a silent countdown, weapons ready"],
+    ["checkpoint", "Contrôle au checkpoint", "Checkpoint stop",
+      "The animal mans a roadside checkpoint, one palm raised to stop the viewer, weapon hanging from its sling",
+      "They man a roadside checkpoint, one raising a palm to stop the viewer while the others stand guard behind a barrier"],
+    ["convoy", "À l'arrière du pick-up", "Riding in a pickup bed",
+      "The animal rides standing in the bed of a moving pickup truck, one hand gripping the roll bar, fur blown by the wind",
+      "They ride crammed in the bed of a moving pickup truck, gripping the roll bar, fur blown by the wind"],
+    ["helico", "Largage en hélicoptère", "Helicopter insertion",
+      "The animal sits in the open door of a helicopter in flight, legs dangling outside, weapon across its lap",
+      "They sit in the open doors of a helicopter in flight, legs dangling outside, weapons across their laps"],
+    ["parachute", "Saut en parachute", "Parachute jump",
+      "The animal is descending under an open military parachute, weapon strapped across its chest, looking down calmly",
+      "They are descending under open military parachutes in a loose formation, weapons strapped across their chests"],
+    ["boat", "Assaut en zodiac", "Raid by inflatable boat",
+      "The animal crouches at the bow of a speeding inflatable boat, spray flying, weapon pointed forward",
+      "They crouch low in a speeding inflatable boat, spray flying, weapons pointed forward"],
+    ["guard", "Tour de garde ennuyeux", "Boring guard duty",
+      "The animal is on guard duty at a sandbag post, slumped in a plastic chair, visibly bored, weapon resting on its knees",
+      "They are on guard duty at a sandbag post, slumped in plastic chairs, visibly bored, weapons resting on their knees"],
+    ["cleaning", "Nettoyage des armes", "Cleaning the weapons",
+      "The animal sits cross-legged on a tarp, carefully cleaning its weapon with a rag, tools laid out in a neat row",
+      "They sit cross-legged on a tarp, carefully cleaning their weapons with rags, tools laid out in neat rows"],
+    ["mess", "Pause repas", "Meal break",
+      "The animal eats from a mess tin with a spoon, sitting on an ammunition crate, weapon leaning against its leg",
+      "They eat from mess tins sitting on ammunition crates in a circle, weapons leaning against their legs"],
+    ["cards", "Partie de cartes", "Card game",
+      "The animal plays cards alone on an upturned crate, cards held close to its chest, suspicious look, weapon within reach",
+      "They play cards around an upturned crate, cards held close to their chests, suspicious looks, weapons within reach"],
+    ["press", "Conférence de presse", "Press conference",
+      "The animal gives a press conference behind a table covered in microphones, one finger raised, weapon lying on the table",
+      "They give a press conference seated in a row behind a table covered in microphones, the one in the middle raising a finger"],
+    ["medal", "Remise de médailles", "Medal ceremony",
+      "The animal stands rigidly at attention while a medal is pinned on its chest by a hand entering the frame",
+      "They stand rigidly at attention in a line while one of them pins a medal on another's chest"],
+    ["loot", "Retour de mission avec le butin", "Back from the job with the loot",
+      "The animal walks back from a job carrying a bulging duffel bag over one shoulder, weapon in the other hand",
+      "They walk back from a job side by side carrying bulging duffel bags, weapons in their free hands"],
+    ["hostage", "Vidéo de revendication (régime de bananes)", "Ransom video (bunch of bananas)",
+      "The animal stands in front of a plain sheet hung as a backdrop, guarding a bunch of bananas placed on a chair like a hostage",
+      "They stand in a row in front of a plain sheet hung as a backdrop, guarding a bunch of bananas placed on a chair like a hostage"],
+    ["wanted", "Photo d'identité judiciaire", "Mugshot",
+      "The animal stands against a height chart wall for a mugshot, weapon confiscated on a table beside it, unrepentant look",
+      "They stand side by side against a height chart wall for a line-up, weapons confiscated on a table in front, unrepentant looks"],
+    ["explosion", "Marche dos à l'explosion", "Walking away from the explosion",
+      "The animal walks calmly towards the camera without looking back while a huge explosion blooms behind it",
+      "They walk calmly towards the camera in a line without looking back while a huge explosion blooms behind them"],
+    ["standoff", "Face-à-face tendu", "Tense standoff",
+      "The animal is in a tense standoff, seen over the shoulder of a blurred opponent in the foreground, weapon half raised",
+      "They are locked in a tense standoff, split into two groups facing each other, weapons half raised, nobody blinking"],
+    ["victory", "Célébration de victoire", "Victory celebration",
+      "The animal celebrates on top of a captured vehicle, weapon raised above its head with one arm",
+      "They celebrate on top of a captured vehicle, weapons raised above their heads"],
+    ["retreat", "Repli en catastrophe", "Panicked retreat",
+      "The animal sprints towards the camera in a panicked retreat, looking back over its shoulder, weapon clutched to its chest",
+      "They sprint towards the camera in a panicked retreat, looking back over their shoulders, weapons clutched to their chests"],
+    ["night", "Infiltration de nuit", "Night infiltration",
+      "The animal creeps forward in a low crouch, seen in green night-vision tones, eyes glowing",
+      "They creep forward in a low crouch in a staggered line, seen in green night-vision tones, eyes glowing"],
+    ["sniper", "Poste de tir embusqué", "Hidden firing position",
+      "The animal lies prone in a camouflaged hide covered with netting and leaves, one eye at the sights",
+      "They lie prone in a camouflaged hide covered with netting and leaves, one aiming while another watches through binoculars"],
+    ["parade", "Défilé militaire", "Military parade",
+      "The animal marches in a military parade with an exaggerated goose-step, weapon on the shoulder, eyes right",
+      "They march in a military parade in perfect ranks with an exaggerated goose-step, weapons on their shoulders, eyes right"]
+  ];
+
+  /* [id, fr, en, setting] — "auto" keeps the faction's own setting */
+  var DECORS = [
+    ["auto", "Décor du camp (auto)", "Faction's own setting (auto)", ""],
+    ["jungle", "Jungle", "Jungle", "deep in a dense tropical jungle, giant leaves, hanging vines and humid haze"],
+    ["desert", "Désert", "Desert", "in an open sand desert with dunes and heat shimmer"],
+    ["savanna", "Savane", "Savannah", "on a dry savannah with tall yellow grass and a lone acacia tree"],
+    ["mountain", "Montagne enneigée", "Snowy mountain", "on a snow-covered mountain ridge, wind blowing powder snow"],
+    ["city", "Ville en ruines", "Ruined city", "in a street of a ruined city, collapsed concrete buildings and rubble"],
+    ["favela", "Favela", "Favela", "in a steep narrow alley of a hillside shanty town, tangled cables overhead"],
+    ["suburb", "Lotissement pavillonnaire", "Quiet suburb", "in a spotless suburban cul-de-sac with trimmed hedges and parked family cars"],
+    ["supermarket", "Supermarché", "Supermarket", "in the fruit aisle of a brightly lit supermarket"],
+    ["zoo", "Zoo après la fermeture", "Zoo after closing", "inside a zoo after closing time, an open enclosure gate behind"],
+    ["office", "Open space de bureau", "Open-plan office", "in a grey open-plan office with cubicles, monitors and a water cooler"],
+    ["metro", "Métro", "Underground station", "on the platform of an underground metro station with tiled walls"],
+    ["beach", "Plage", "Beach", "on a tropical beach at the waterline, palm trees behind"],
+    ["swamp", "Marécage", "Swamp", "knee-deep in a misty swamp among dead trees"],
+    ["arctic", "Banquise", "Arctic ice", "on a flat expanse of arctic sea ice under a pale sky"],
+    ["temple", "Temple en ruines", "Ruined temple", "on the mossy steps of an ancient ruined temple swallowed by roots"],
+    ["airport", "Tarmac d'aéroport", "Airport tarmac", "on an airport tarmac beside a cargo plane with its ramp down"],
+    ["oilrig", "Plateforme pétrolière", "Oil rig", "on the steel deck of an offshore oil rig above a rough sea"],
+    ["farm", "Ferme et champ de maïs", "Farm and cornfield", "at the edge of a cornfield beside an old red barn"],
+    ["casino", "Casino", "Casino", "on the carpeted floor of a casino among slot machines and green tables"],
+    ["space", "Base lunaire", "Moon base", "outside a lunar base on grey moon dust, the Earth in the black sky"]
+  ];
+
+  /* [id, fr, en, light] — "auto" adds nothing */
+  var MOMENTS = [
+    ["auto", "Lumière du décor (auto)", "Setting's own light (auto)", ""],
+    ["dawn", "Aube brumeuse", "Misty dawn", "at dawn, low mist and soft pink light"],
+    ["noon", "Plein midi", "High noon", "at high noon under harsh vertical sunlight and hard shadows"],
+    ["golden", "Fin d'après-midi dorée", "Golden hour", "in warm golden late-afternoon light with long shadows"],
+    ["dusk", "Crépuscule", "Dusk", "at dusk under a deep orange and purple sky"],
+    ["night", "Nuit", "Night", "at night, lit only by moonlight and a few harsh artificial lights"],
+    ["rain", "Pluie battante", "Pouring rain", "under pouring rain, everything soaked and glistening"],
+    ["storm", "Orage", "Thunderstorm", "during a thunderstorm, dark clouds and a lightning flash"],
+    ["fog", "Brouillard épais", "Thick fog", "in thick fog that swallows the background"],
+    ["snow", "Tempête de neige", "Snowstorm", "in a snowstorm, flakes whipping across the frame"],
+    ["sandstorm", "Tempête de sable", "Sandstorm", "in a sandstorm, the air orange with blowing dust"]
+  ];
+
   /* [id, fr, en, prompt lead] */
   var STYLES = [
     ["phone", "Photo de téléphone amateur", "Amateur phone photo",
@@ -551,6 +706,8 @@ footer p { margin: 0; }
       count: "Nombre de singes",
       squad: "Escouade", squadHelp: "Touche un singe pour le modifier avec les menus ci-dessous. Jusqu'à 5 singes.",
       addMonkey: "+ Ajouter un singe", remove: "Retirer",
+      crowd: "Taille du groupe", crowdHelp: "Au-delà de 5, les singes de l'escouade sont au premier rang et le reste de la troupe est derrière eux.",
+      scenario: "Scénario", decor: "Décor", moment: "Moment",
       s1: "Brief de mission", species: "Espèce du singe sélectionné", weaponBy: "Choisir l'arme", byNation: "Par nation", byType: "Par type",
       nation: "Nation", type: "Type d'arme", weapon: "Arme du singe sélectionné", faction: "Camp des combattants", style: "Style d'image", ratio: "Format",
       random: "Tirage au hasard",
@@ -576,6 +733,8 @@ footer p { margin: 0; }
       count: "Number of monkeys",
       squad: "Squad", squadHelp: "Tap a monkey to edit it with the menus below. Up to 5 monkeys.",
       addMonkey: "+ Add a monkey", remove: "Remove",
+      crowd: "Group size", crowdHelp: "Above 5, the squad monkeys stand in the front row and the rest of the troop is behind them.",
+      scenario: "Scenario", decor: "Setting", moment: "Time and weather",
       s1: "Mission brief", species: "Selected monkey's species", weaponBy: "Pick the weapon", byNation: "By nation", byType: "By type",
       nation: "Nation", type: "Weapon type", weapon: "Selected monkey's weapon", faction: "Fighter faction", style: "Image style", ratio: "Format",
       random: "Randomise",
@@ -608,6 +767,7 @@ footer p { margin: 0; }
   var $ = function (id) { return document.getElementById(id); };
   var el = {
     species: $("species"), group: $("group"), weapon: $("weapon"), faction: $("faction"),
+    crowd: $("crowd"), scenario: $("scenario"), decor: $("decor"), moment: $("moment"),
     style: $("style"), ratio: $("ratio"), emote: $("emote"), prompt: $("prompt"), canvas: $("canvas"),
     topText: $("topText"), bottomText: $("bottomText"), save: $("save")
   };
@@ -718,23 +878,35 @@ footer p { margin: 0; }
         squad.map(function (m, i) { return "(" + (i + 1) + ") " + find(SPECIES, m.s)[3] + " " + hold(find(WEAPONS, m.w)); }).join("; ") + ". " +
         "Each one is " + f[3] + ". Every animal and every weapon is clearly distinct and fully visible. ";
     }
-    var many = squad.length > 1;
+    var cr = find(CROWDS, el.crowd.value)[3];
+    if (cr) {
+      who += (squad.length === 1 ? "It stands" : "They stand") + " in the front row of " +
+        (cr < 0 ? "an entire army of hundreds of armed primates of mixed species, ranks stretching all the way to the horizon"
+                : "a troop of " + cr + " armed primates of mixed species in total") +
+        ", the others dressed the same way and carrying an assortment of similar weapons, packed behind and slightly out of focus. ";
+    }
+    var many = squad.length > 1 || !!cr;
+    var sc = find(SCENARIOS, el.scenario.value);
+    var scene = sc[many ? 4 : 3] + ". ";
+    var dec = find(DECORS, el.decor.value), mo = find(MOMENTS, el.moment.value);
+    var setting = "Setting: " + (dec[3] || f[4]) + ". " +
+      (mo[3] ? "Time and light: " + mo[3] + (dec[3] ? "" : ", overriding any other lighting cue") + ". " : "");
     if (out === "video") {
       el.prompt.value =
         VIDEO_LEADS[st[0]] + ". " + who +
+        (sc[0] === "portrait" ? "" : "Opening situation: " + scene) +
         "Action: " + (many ? "they all perform " : "the animal performs ") + find(EMOTES, el.emote.value)[3] +
         (many ? ", perfectly in sync, weapons still in hand, with dead-serious faces, then they freeze and stare at the camera. "
               : ", weapon still in hand, with a dead-serious face, then freezes and stares at the camera. ") +
-        "Setting: " + f[4] + ". " +
+        setting +
         "Smooth natural motion, stable anatomy and fur, weapons stay correctly proportioned, absurd deadpan humour. " +
         "No humans in focus, no text, no captions, no watermark, no logos. " +
         "Duration about 5 seconds. Aspect ratio " + el.ratio.value + ".";
     } else {
       el.prompt.value =
-        st[3] + ". " + who +
-        (many ? "They all stare straight at the camera with dead-serious, unimpressed expressions. "
-              : "The animal stares straight at the camera with a dead-serious, unimpressed expression. ") +
-        "Setting: " + f[4] + ". " +
+        st[3] + ". " + who + scene +
+        (sc[0] === "portrait" ? "" : (many ? "Their faces stay dead-serious throughout. " : "Its face stays dead-serious throughout. ")) +
+        setting +
         "Accurate animal anatomy and fur, weapons correctly proportioned and recognisable, absurd deadpan humour. " +
         "No humans in focus, no text, no captions, no watermark, no logos. " +
         "Leave clear space at the top and bottom of the frame for meme captions. " +
@@ -845,6 +1017,10 @@ footer p { margin: 0; }
     $("langEn").setAttribute("aria-pressed", String(lang === "en"));
     fill(el.species, simple(SPECIES));
     fill(el.faction, simple(FACTIONS));
+    fill(el.crowd, simple(CROWDS));
+    fill(el.scenario, simple(SCENARIOS));
+    fill(el.decor, simple(DECORS));
+    fill(el.moment, simple(MOMENTS));
     fill(el.style, simple(STYLES));
     fill(el.ratio, simple(RATIOS));
     fill(el.emote, simple(EMOTES));
@@ -877,12 +1053,15 @@ footer p { margin: 0; }
   });
   $("outImage").addEventListener("click", function () { setOut("image"); });
   $("outVideo").addEventListener("click", function () { setOut("video"); });
-  ["species", "weapon", "faction", "style", "ratio", "emote"].forEach(function (k) {
+  ["species", "weapon", "faction", "crowd", "scenario", "decor", "moment", "style", "ratio", "emote"].forEach(function (k) {
     el[k].addEventListener("change", function () { status("copyStatus", ""); buildPrompt(); });
   });
   $("random").addEventListener("click", function () {
     squad = squad.map(function () { return { s: pick(SPECIES)[0], w: pick(WEAPONS)[0] }; });
     el.faction.value = pick(FACTIONS)[0];
+    el.scenario.value = pick(SCENARIOS)[0];
+    el.decor.value = pick(DECORS)[0];
+    el.moment.value = pick(MOMENTS)[0];
     el.style.value = pick(STYLES)[0];
     el.emote.value = pick(EMOTES)[0];
     selectMember(active);
