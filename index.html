@@ -187,6 +187,12 @@ footer p { margin: 0; }
   <section aria-labelledby="h-brief">
     <h2 id="h-brief"><span class="num">01</span><span data-i18n="s1"></span></h2>
     <div class="field">
+      <span class="label" id="countLabel" data-i18n="count"></span>
+      <div class="seg" id="count" role="group" aria-labelledby="countLabel">
+        <button type="button" data-n="1">1</button><button type="button" data-n="2">2</button><button type="button" data-n="3">3</button><button type="button" data-n="4">4</button><button type="button" data-n="5">5</button>
+      </div>
+    </div>
+    <div class="field">
       <span class="label" id="squadLabel" data-i18n="squad"></span>
       <div class="squad" id="squad" role="group" aria-labelledby="squadLabel"></div>
       <p class="help" data-i18n="squadHelp"></p>
@@ -542,6 +548,7 @@ footer p { margin: 0; }
   var T = {
     fr: {
       tagline: "Choisis ton singe, son arme et son camp. Le site écrit le prompt, ton IA d'image fait la photo, tu ajoutes la légende.",
+      count: "Nombre de singes",
       squad: "Escouade", squadHelp: "Touche un singe pour le modifier avec les menus ci-dessous. Jusqu'à 5 singes.",
       addMonkey: "+ Ajouter un singe", remove: "Retirer",
       s1: "Brief de mission", species: "Espèce du singe sélectionné", weaponBy: "Choisir l'arme", byNation: "Par nation", byType: "Par type",
@@ -566,6 +573,7 @@ footer p { margin: 0; }
     },
     en: {
       tagline: "Pick your monkey, its weapon and its side. The site writes the prompt, your image AI takes the picture, you add the caption.",
+      count: "Number of monkeys",
       squad: "Squad", squadHelp: "Tap a monkey to edit it with the menus below. Up to 5 monkeys.",
       addMonkey: "+ Add a monkey", remove: "Remove",
       s1: "Mission brief", species: "Selected monkey's species", weaponBy: "Pick the weapon", byNation: "By nation", byType: "By type",
@@ -644,6 +652,9 @@ footer p { margin: 0; }
   }
   function renderSquad() {
     var box = $("squad"); box.textContent = "";
+    document.querySelectorAll("#count button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(Number(b.getAttribute("data-n")) === squad.length));
+    });
     squad.forEach(function (m, i) {
       var chip = document.createElement("div"); chip.className = "chip" + (i === active ? " on" : "");
       var b = document.createElement("button"); b.type = "button"; b.className = "pick";
@@ -671,6 +682,11 @@ footer p { margin: 0; }
       selectMember(squad.length - 1);
     });
     box.appendChild(add);
+  }
+  function setCount(n) {
+    while (squad.length < n) squad.push({ s: pick(SPECIES)[0], w: pick(WEAPONS)[0] });
+    squad.length = n;
+    selectMember(Math.min(active, n - 1));
   }
   function selectMember(i) {
     active = i; ready = false;
@@ -856,6 +872,9 @@ footer p { margin: 0; }
     var w = find(WEAPONS, el.weapon.value); setMode("type", w[2], w[0]);
   });
   el.group.addEventListener("change", function () { fillWeapons(); buildPrompt(); });
+  document.querySelectorAll("#count button").forEach(function (b) {
+    b.addEventListener("click", function () { setCount(Number(b.getAttribute("data-n"))); });
+  });
   $("outImage").addEventListener("click", function () { setOut("image"); });
   $("outVideo").addEventListener("click", function () { setOut("video"); });
   ["species", "weapon", "faction", "style", "ratio", "emote"].forEach(function (k) {
